@@ -1,0 +1,5 @@
+policy,n_params,param_kb
+employed_policy,20108,78.546875
+onlooker_policy,38540,150.546875
+scout_policy,5964,23.296875
+# single-agent inference process RSS: 687.9 MB

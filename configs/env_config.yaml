@@ -1,0 +1,149 @@
+# Edge Scheduling Environment Configuration
+
+environment:
+  name: "EdgeScheduling-v0"
+  num_agents: 10
+  max_episode_steps: 3600
+  step_duration: 1.0
+  
+# Edge Device Specifications
+devices:
+  - type: "jetson_nano"
+    count: 3
+    cpu_cores: 4
+    cpu_speed_ghz: 1.43
+    memory_mb: 4096
+    gpu_cores: 128
+    battery_capacity_mah: 5000
+    idle_power_w: 5
+    max_power_w: 10
+    
+  - type: "raspberry_pi"
+    count: 4
+    cpu_cores: 4
+    cpu_speed_ghz: 1.5
+    memory_mb: 2048
+    gpu_cores: 0
+    battery_capacity_mah: 3000
+    idle_power_w: 3
+    max_power_w: 7
+    
+  - type: "smart_camera"
+    count: 3
+    cpu_cores: 2
+    cpu_speed_ghz: 1.0
+    memory_mb: 1024
+    gpu_cores: 0
+    battery_capacity_mah: 2000
+    idle_power_w: 2
+    max_power_w: 5
+
+# Task Types
+tasks:
+  - name: "face_recognition"
+    cpu_load: [70, 90]
+    memory_mb: 512
+    duration_ms: [300, 500]
+    deadline_ms: 500
+    energy_cost_mj: 150
+    priority: 2
+    arrival_rate: 20
+    
+  - name: "object_detection"
+    cpu_load: [40, 60]
+    memory_mb: 256
+    duration_ms: [600, 1000]
+    deadline_ms: 1000
+    energy_cost_mj: 200
+    priority: 1
+    arrival_rate: 15
+    
+  - name: "anomaly_detection"
+    cpu_load: [20, 40]
+    memory_mb: 128
+    duration_ms: [1000, 2000]
+    deadline_ms: 2000
+    energy_cost_mj: 50
+    priority: 0
+    arrival_rate: 10
+    
+  - name: "data_preprocessing"
+    cpu_load: [10, 20]
+    memory_mb: 64
+    duration_ms: [2000, 5000]
+    deadline_ms: 5000
+    energy_cost_mj: 30
+    priority: 0
+    arrival_rate: 5
+
+# Network Configuration
+network:
+  topology: "mesh"
+  base_latency_ms: 30
+  latency_std_ms: 15
+  bandwidth_mbps: 100
+  packet_loss_rate: 0.01
+  
+  cloud:
+    enabled: true
+    latency_ms: 150
+    latency_std_ms: 50
+    bandwidth_mbps: 1000
+    cost_per_task: 0.5
+
+# State Space (15 dimensions per agent)
+state_space:
+  local_state:
+    - cpu_usage
+    - memory_usage
+    - battery_level
+    - temperature
+    - queue_length
+    - current_load
+  
+  network_state:
+    - network_latency
+    - bandwidth_usage
+    - packet_loss
+  
+  task_state:
+    - task_type
+    - task_priority
+    - task_deadline
+  
+  neighbor_state:
+    - neighbor_avg_cpu
+    - neighbor_min_queue
+    - neighbor_connectivity
+
+# Action Space (12 actions)
+action_space:
+  num_actions: 12
+  actions:
+    - id: 0
+      name: "execute_local"
+      description: "Execute task on local device"
+    
+    - id: 1-9
+      name: "offload_to_neighbor"
+      description: "Offload to one of 9 neighbors"
+    
+    - id: 10
+      name: "offload_to_cloud"
+      description: "Offload to cloud server"
+    
+    - id: 11
+      name: "reject_task"
+      description: "Reject task (overload scenario)"
+
+# Reward Function Weights
+reward:
+  alpha: 0.3
+  beta: 0.2
+  gamma: 0.3
+  delta: 0.1
+  epsilon: 0.1
+  
+  deadline_penalty: 100.0
+  rejection_penalty: 50.0
+  communication_cost: 5.0

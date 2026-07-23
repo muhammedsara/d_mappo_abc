@@ -1,0 +1,39 @@
+# Artificial Bee Colony Configuration
+
+abc:
+  # Population Parameters
+  num_food_sources: 50
+  num_employed_bees: 25
+  num_onlooker_bees: 25
+  num_scout_bees: 5
+  
+  # ABC Operators
+  employed:
+    phi_min: -1.0
+    phi_max: 1.0
+    neighborhood_size: 3
+  
+  onlooker:
+    selection_method: "roulette_wheel"
+    tournament_size: 3
+  
+  scout:
+    limit: 3
+    exploration_rate: 0.3
+  
+  # Fitness Function
+  fitness:
+    objective: "minimize"
+    normalization: "minmax"
+    
+  # Integration with MAPPO
+  integration:
+    experience_weighting: true
+    weight_temperature: 1.0
+    guidance_strength: 0.5
+    
+  # Update Frequency
+  update_frequency:
+    employed_update: 1
+    onlooker_update: 1
+    scout_check: 5

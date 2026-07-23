@@ -1,0 +1,13 @@
+employed_agents:
+- 0
+- 1
+- 2
+- 3
+onlooker_agents:
+- 4
+- 5
+- 6
+- 7
+scout_agents:
+- 8
+- 9

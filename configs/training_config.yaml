@@ -1,0 +1,146 @@
+# Training Configuration for D-MAPPO-ABC
+
+training:
+  # General Settings
+  run_name: "d_mappo_abc_v1"
+  seed: 42
+  num_workers: 2
+  num_gpus: 0.5
+  num_gpus_per_worker: 0
+  
+  # Training Parameters
+  num_episodes: 500
+  max_episode_steps: 3600
+  evaluation_interval: 20
+  checkpoint_interval: 50
+  
+  # Framework
+  framework: "torch"
+  algorithm: "MAPPO"
+  
+  # Multi-Agent Settings
+  policies:
+    # Policy 1: Employed Bee Behavior
+    employed_policy:
+      model:
+        fcnet_hiddens: [128, 128]
+        fcnet_activation: "relu"
+        vf_share_layers: false
+      
+    # Policy 2: Onlooker Bee Behavior  
+    onlooker_policy:
+      model:
+        fcnet_hiddens: [256, 128]
+        fcnet_activation: "relu"
+        vf_share_layers: false
+        
+    # Policy 3: Scout Bee Behavior
+    scout_policy:
+      model:
+        fcnet_hiddens: [64, 64]
+        fcnet_activation: "relu"
+        vf_share_layers: false
+  
+  # Policy Mapping (which agents use which policy)
+  policy_mapping:
+    employed_agents: [0, 1, 2, 3]
+    onlooker_agents: [4, 5, 6, 7]
+    scout_agents: [8, 9]
+  
+  # PPO Hyperparameters
+  ppo:
+    # Learning
+    lr: 0.0001
+    lr_schedule: [[0, 0.0001], [400, 0.00001]]
+    
+    # PPO-specific
+    clip_param: 0.2
+    grad_clip: 0.5
+    vf_clip_param: 10.0
+    entropy_coeff: 0.02
+    entropy_coeff_schedule: [[0, 0.03], [400, 0.01]]
+    
+    # Training batch
+    train_batch_size: 4096
+    sgd_minibatch_size: 256
+    num_sgd_iter: 10
+    
+    # Advantage estimation
+    use_gae: true
+    lambda: 0.95
+    gamma: 0.99
+    
+    # Value function
+    vf_loss_coeff: 0.5
+    
+    # KL divergence
+    kl_coeff: 0.2
+    kl_target: 0.01
+    
+  # Rollout Settings
+  rollout:
+    rollout_fragment_length: 512
+    batch_mode: "truncate_episodes"
+    
+  # Replay Buffer
+  replay_buffer:
+    capacity: 100000
+    prioritized_replay: true
+    prioritized_replay_alpha: 0.6
+    prioritized_replay_beta: 0.4
+    prioritized_replay_eps: 1e-6
+
+# Baseline Comparisons
+baselines:
+  - name: "round_robin"
+    enabled: true
+    
+  - name: "greedy"
+    enabled: true
+    
+  - name: "central_marlabc"
+    enabled: true
+    config:
+      q_learning:
+        lr: 0.01
+        gamma: 0.99
+        epsilon: 0.1
+        
+  - name: "pure_mappo"
+    enabled: true
+
+# Logging & Monitoring
+logging:
+  # Weights & Biases
+  wandb:
+    enabled: true
+    project: "d_mappo_abc_edge"
+    entity: null
+    tags: ["edge_computing", "marl", "abc"]
+    
+  # TensorBoard
+  tensorboard:
+    enabled: true
+    log_dir: "./logs/tensorboard"
+    
+  # Console logging
+  console:
+    log_level: "INFO"
+    log_interval: 10
+    
+  # Checkpoints
+  checkpoint:
+    save_dir: "./logs/checkpoints"
+    keep_checkpoints_num: 5
+
+# Evaluation
+evaluation:
+  episodes_per_eval: 10
+  metrics:
+    - "episode_reward_mean"
+    - "episode_len_mean"
+    - "avg_latency"
+    - "energy_consumption"
+    - "deadline_miss_rate"
+    - "load_balance_variance"
+    - "throughput"
